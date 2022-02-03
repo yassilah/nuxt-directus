@@ -66,7 +66,7 @@ function authRole (roleName: string) {
     const redirect = withQuery(redirectAuthLogin, { from: to.fullPath })
 
     function redirectIfNotAuthenticated () {
-      if (role.value?.name !== roleName) {
+      if (role.value?.name.toLowerCase() !== roleName.toLowerCase()) {
         try {
           return navigateTo(redirect)
         } catch {
