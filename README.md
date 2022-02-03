@@ -305,6 +305,33 @@ const { user } = useAuth();
 </template>
 ```
 
-## Licence
+### Typescript
 
-[MIT Licence](./LICENCE)
+If you're using TypeScript, you can enjoy fully typed collections when using the provided composables. All you have to do is extend the following interface:
+
+```ts
+// types.d.ts
+declare module "@nuxt-modules/directus" {
+  interface CollectionTypes {
+    articles: {
+      title: string;
+      content?: string;
+    };
+
+    foo: {
+      usingTypescript: boolean;
+      feeling: "cool" | "super-cool";
+    };
+  }
+}
+```
+
+```vue
+<script lang="ts" setup>
+const articles = useItems("articles"); // Fully typed articles 🔥
+
+const foo = useItem("");
+</script>
+
+## Licence [MIT Licence](./LICENCE)
+```
