@@ -37,16 +37,16 @@ export default defineNuxtConfig({
 This module supports a number of options to let you enjoy the power of Directus with ease 🔥.
 
 ```ts
-{
-    api: string // This is the url of your Directus instance. Defaults to `http://localhost:8055`.,
+interface DirectusOptions {
+  api: string; // This is the url of your Directus instance. Defaults to `http://localhost:8055`.
 
-    redirectAuthLogin: string // This is the url you would like the user to get redirected to when accessing a page that requires authentication. Defaults to `/login`.
+  redirectAuthLogin: string; // This is the url you would like the user to get redirected to when accessing a page that requires authentication. Defaults to `/login`.
 
-    addMiddlewares: boolean // Whether you would like the middlewares included in this module to be added to your app.Defaults to `true`.
+  addMiddlewares: boolean; // Whether you would like the middlewares included in this module to be added to your app.Defaults to `true`.
 
-    addGlobalAuthCheck: boolean // Adds a middleware to check whether the user is authenticated on every route. Disabled if `addMiddlewares` is set to false. Defaults to `true`.
+  addGlobalAuthCheck: boolean; // Adds a middleware to check whether the user is authenticated on every route. Disabled if `addMiddlewares` is set to false. Defaults to `true`.
 
-    addRolesMiddleware: string[] // Adds a list of role-based middleware to check whether the user has a specific role. Disabled if `addMiddlewares` is set to false. Defaults to ['administrator'].
+  addRolesMiddleware: string[]; // Adds a list of role-based middleware to check whether the user has a specific role. Disabled if `addMiddlewares` is set to false. Defaults to ['administrator'].
 }
 ```
 
@@ -118,7 +118,7 @@ You also have a few more options.
 ```vue
 <script lang="ts" setup>
 const items = useItems("foo", {
-  controls: false, // Whether to return a simpel ref or an object. Defaults to `false`.
+  controls: false, // Whether to return a simple ref or an object. Defaults to `false`.
   refreshOnAuthChanged: true, // Whether you would like to autoamatically refresh the list whenever your user auth status changes. Defaults to `true`.
   watch: true, // Whether you would like to automatically refresh the list whenever your collection name changes. Defaults to `true`.
   fetch: true, // Whether you would like to fetch the list on initialization.
