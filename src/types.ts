@@ -1,5 +1,5 @@
 import type { ID, PartialItem, TypeMap, TypeOf } from '@directus/sdk'
-
+import type { Ref } from 'vue'
 declare module '@nuxt-modules/directus' {
     export interface CollectionTypes { }
     export type GenericCollectionTypes = TypeMap & CollectionTypes

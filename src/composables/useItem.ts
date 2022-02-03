@@ -8,16 +8,16 @@ interface UseCollectionItemsOptions<C extends boolean> {
   fetch?: boolean
   controls?: C
   watch?: boolean
+  refreshOnAuthChanged?: boolean
 }
 
 /**
  * Use Directus collection items.
  */
-
 export function useItem <N extends CollectionNames> (name: ReactiveArg<N>, id: ReactiveArg<ID>, options?: Partial<UseCollectionItemsOptions<false>>): Ref<Item<N>>
-export function useItem <N extends CollectionNames> (name: ReactiveArg<N>, id: ReactiveArg<ID>, options?: Partial<UseCollectionItemsOptions<true>>): { item: Ref<Item<N>>, loading: Ref<boolean>, fetch: () => Promise<void> }
+export function useItem <N extends CollectionNames> (name: ReactiveArg<N>, id: ReactiveArg<ID>, options?: Partial<UseCollectionItemsOptions<true>>): { item: Ref<Item<N>>, loading: Ref<boolean>, fetch: () => Promise<void>, error: Ref<string|null> }
 export function useItem <N extends CollectionNames> (name: ReactiveArg<N>, id: ReactiveArg<ID>, options?: UseCollectionItemsOptions<boolean>) {
-  const _options = defu(options, { fetch: true, controls: false, watch: true })
+  const _options = defu(options, { fetch: true, controls: false, watch: true, refreshOnAuthChanged: true })
 
   const collection = useCollection(name)
 
@@ -25,14 +25,23 @@ export function useItem <N extends CollectionNames> (name: ReactiveArg<N>, id: R
 
   const loading = ref(false)
 
+  const error = ref<string|null>(null)
+
   const idValue = computed(() => {
     return typeof id === 'function' ? id() : unref(id)
   })
 
   async function fetch () {
-    loading.value = true
-    item.value = await collection.value.readOne(unref(idValue))
-    loading.value = false
+    try {
+      error.value = null
+      loading.value = true
+      item.value = await collection.value.readOne(unref(idValue))
+    } catch (e) {
+      item.value = undefined
+      error.value = e
+    } finally {
+      loading.value = false
+    }
   }
 
   if (_options.fetch) {
@@ -43,8 +52,13 @@ export function useItem <N extends CollectionNames> (name: ReactiveArg<N>, id: R
     watchEffect(fetch)
   }
 
+  if (_options.refreshOnAuthChanged) {
+    const { user } = useAuth()
+    watch(user, fetch)
+  }
+
   if (_options.controls) {
-    return { item, loading, fetch }
+    return { item, loading, fetch, error }
   }
 
   return item

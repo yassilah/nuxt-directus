@@ -8,6 +8,7 @@ interface UseCollectionItemsOptions<C extends boolean> {
   fetch?: boolean
   watch?: boolean
   controls?: C
+  refreshOnAuthChanged?: boolean
 }
 
 /**
@@ -15,9 +16,9 @@ interface UseCollectionItemsOptions<C extends boolean> {
  */
 
 export function useItems<N extends CollectionNames> (name: ReactiveArg<N>, options?: UseCollectionItemsOptions<false>): Ref<Collection<N>>
-export function useItems <N extends CollectionNames> (name: ReactiveArg<N>, options?: UseCollectionItemsOptions<true>): { items: Ref<Collection<N>>, loading: Ref<boolean>, fetch: () => Promise<void>, collection: ComputedRef<IItems<Item<N>>> }
+export function useItems <N extends CollectionNames> (name: ReactiveArg<N>, options?: UseCollectionItemsOptions<true>): { items: Ref<Collection<N>>, loading: Ref<boolean>, fetch: () => Promise<void>, collection: ComputedRef<IItems<Item<N>>>, error: Ref<string|null> }
 export function useItems <N extends CollectionNames> (name: ReactiveArg<N>, options?: UseCollectionItemsOptions<boolean>) {
-  const _options = defu(options, { fetch: true, controls: false, watch: true })
+  const _options = defu(options, { fetch: true, controls: false, watch: true, refreshOnAuthChanged: true })
 
   const collection = useCollection(name)
 
@@ -25,11 +26,20 @@ export function useItems <N extends CollectionNames> (name: ReactiveArg<N>, opti
 
   const loading = ref(false)
 
+  const error = ref<string|null>(null)
+
   async function fetch () {
-    loading.value = true
-    const { data } = await collection.value.readMany()
-    items.value = data
-    loading.value = false
+    try {
+      error.value = null
+      loading.value = true
+      const { data } = await collection.value.readMany()
+      items.value = data
+    } catch (e) {
+      items.value = []
+      error.value = e
+    } finally {
+      loading.value = false
+    }
   }
 
   if (_options.fetch) {
@@ -40,8 +50,13 @@ export function useItems <N extends CollectionNames> (name: ReactiveArg<N>, opti
     watchEffect(fetch)
   }
 
+  if (_options.refreshOnAuthChanged) {
+    const { user } = useAuth()
+    watch(user, fetch)
+  }
+
   if (_options.controls) {
-    return { items, loading, fetch, collection }
+    return { items, loading, fetch, collection, error }
   }
 
   return items
