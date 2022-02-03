@@ -1,5 +1,4 @@
 import type { EffectScope } from 'vue'
-import { effectScope, onScopeDispose } from 'vue'
 
 /**
  * Copied from the amazing VueUse library: https://vueuse.org/createSharedComposable
@@ -24,7 +23,9 @@ export function createSharedComposable<Fn extends ((...args: any[]) => any)>(com
       scope = effectScope(true)
       state = scope.run(() => composable(...args))
     }
-    onScopeDispose(dispose)
+    if (getCurrentScope()) {
+      onScopeDispose(dispose)
+    }
     return state
   })
 }

@@ -1,4 +1,4 @@
-import { AuthCredentials, PartialItem, UserItem } from '@directus/sdk'
+import { AuthCredentials, PartialItem, RoleItem, UserItem } from '@directus/sdk'
 import { createSharedComposable } from './../utils/composables'
 
 /**
@@ -18,6 +18,8 @@ export const useAuth = createSharedComposable(() => {
   })
 
   const user = ref<PartialItem<UserItem>>()
+
+  const role = ref<RoleItem>()
 
   const authenticated = computed(() => {
     return !!user.value
@@ -69,20 +71,22 @@ export const useAuth = createSharedComposable(() => {
 
   async function setUser () {
     user.value = await directus.users.me.read()
+    role.value = await directus.roles.readOne(user.value.role)
   }
 
   function unsetUser () {
     user.value = undefined
   }
 
-  async function initialize () {
+  async function check () {
     if (directus.auth.token) {
-      await setUser()
-      if (!user.value) {
+      try {
+        await setUser()
+      } catch {
         await refresh()
       }
     }
   }
 
-  return { user, authenticated, login, logout, loggingOut, loggingIn, loading, refreshing, refresh, initialize }
+  return { user, authenticated, login, logout, loggingOut, loggingIn, loading, refreshing, refresh, check, role }
 })

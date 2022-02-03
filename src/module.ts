@@ -1,10 +1,13 @@
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { defineNuxtModule, addPlugin } from '@nuxt/kit'
+import { defineNuxtModule, addPlugin, addServerMiddleware } from '@nuxt/kit'
 
 export interface DirectusOptions {
   api: string
   redirectAuthLogin: string
+  addGlobalAuthCheck: boolean
+  addMiddlewares: boolean
+  addRolesMiddleware: string[]
 }
 
 declare module '@nuxt/schema' {
@@ -12,6 +15,9 @@ declare module '@nuxt/schema' {
     directus: {
       api: string
       redirectAuthLogin: string
+      addGlobalAuthCheck: boolean
+      addMiddlewares: boolean
+      addRolesMiddleware: string[]
     }
   }
 }
@@ -23,12 +29,18 @@ export default defineNuxtModule<DirectusOptions>({
   },
   defaults: {
     api: 'http://localhost:8055',
-    redirectAuthLogin: '/login'
+    redirectAuthLogin: '/login',
+    addGlobalAuthCheck: true,
+    addMiddlewares: true,
+    addRolesMiddleware: ['Administrator']
   },
   setup (options, nuxt) {
     nuxt.options.publicRuntimeConfig.directus = {
       api: options.api,
-      redirectAuthLogin: options.redirectAuthLogin
+      redirectAuthLogin: options.redirectAuthLogin,
+      addGlobalAuthCheck: true,
+      addMiddlewares: true,
+      addRolesMiddleware: options.addRolesMiddleware
     }
 
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
