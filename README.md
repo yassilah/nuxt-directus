@@ -311,7 +311,7 @@ If you're using TypeScript, you can enjoy fully typed collections when using the
 
 ```ts
 // types.d.ts
-declare module "@nuxt-modules/directus" {
+declare module "@module" {
   interface CollectionTypes {
     articles: {
       title: string;
@@ -320,7 +320,7 @@ declare module "@nuxt-modules/directus" {
 
     foo: {
       usingTypescript: boolean;
-      feeling: "cool" | "super-cool";
+      feeling: "nice" | "very-nice";
     };
   }
 }
@@ -330,8 +330,12 @@ declare module "@nuxt-modules/directus" {
 <script lang="ts" setup>
 const articles = useItems("articles"); // Fully typed articles 🔥
 
-const foo = useItem("");
-</script>
+const foo = useItem("foo", 2);
 
-## Licence [MIT Licence](./LICENCE)
+foo.value.feeling = "bad"; // TypeError
+</script>
 ```
+
+## Licence
+
+[MIT Licence](./LICENCE)
