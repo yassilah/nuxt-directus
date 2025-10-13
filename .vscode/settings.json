@@ -1,6 +1,7 @@
 {
-  "eslint.experimental.useFlatConfig": true,
   "i18n-ally.localesPaths": [
-    "src/runtime/lang"
-  ]
+    "playground/.locales"
+  ],
+  "i18n-ally.displayLanguage": "en-GB",
+  "i18n-ally.keystyle": "flat"
 }

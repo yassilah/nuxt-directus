@@ -1,6 +1,10 @@
-import { ENDPOINT } from '../../constants'
+// @ts-expect-error - @nuxtjs/i18n may not be installed.
+import { defineI18nLocale } from '#i18n'
+import { getI18nTranslations } from '../helpers'
 
-export default defineI18nLocale(async locale => {
-    const raw = await $fetch(ENDPOINT, {  query: { locale }  })
-    return Object.fromEntries(raw.map(item => [item.key, item.value]))
+/**
+ * Define the i18n locale loader.
+ */
+export default defineI18nLocale((locale: string) => {
+  return getI18nTranslations(locale)
 })
