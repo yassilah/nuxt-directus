@@ -148,9 +148,8 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
     }
 
     const path = 'directus/locales'
-    const watcher = chokidar.watch(resolve(nuxt.options.buildDir, path, '*.json'), { ignoreInitial: true })
 
-    codes.map((code) => {
+    const result = codes.map((code) => {
       const { dst } = addTemplate({
         write: true,
         filename: join(path, `${code}.json`),
@@ -159,14 +158,21 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
         }),
       })
 
+      return { code, dst }
+    })
+
+    if (!nuxt.options._prepare) {
+      const watcher = chokidar.watch(resolve(nuxt.options.buildDir, path, '*.json'), { ignoreInitial: true })
+
       watcher.on('change', async (filePath) => {
-        if (filePath !== dst) return
+        const code = result.find(i => i.dst === filePath)?.code
+        if (!code) return
         const translations = JSON.parse(readFileSync(filePath, 'utf-8'))
         const done = await syncTranslations(code, translations, runtimeConfig)
         if (!done) return
         logger.info(`Synced translations for locale: ${code}`)
       })
-    })
+    }
   }
 
   nuxt.hook('i18n:registerModule', (register) => {
