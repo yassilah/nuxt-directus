@@ -1,4 +1,16 @@
 # Changelog
+## v0.0.3
+
+[compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.1...v0.0.3)
+
+### 🏡 Chore
+
+- **release:** V0.0.2 ([0e0e09f](https://github.com/yassilah/nuxt-directus/commit/0e0e09f))
+
+### ❤️ Contributors
+
+- Yasser Lahbibi ([@yassilah](https://github.com/yassilah))
+
 ## v0.0.2
 
 [compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.1...v0.0.2)
