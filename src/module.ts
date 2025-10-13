@@ -10,6 +10,7 @@ import { defu } from 'defu'
 import { fetchTranslations, syncTranslations } from './runtime/server'
 import { readFileSync } from 'node:fs'
 import { NAME } from './runtime/constants'
+import { join } from 'node:path'
 
 interface ModuleOptions {
   url?: string
@@ -145,22 +146,31 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
       i18nPrefix: config.i18n.prefix,
     }
 
+    const path = 'directus/locales'
+    const dirPath = resolve(nuxt.options.buildDir, path)
+    nuxt.options.watch.push(join(dirPath, '**'))
+    nuxt.options.vite.server = defu(nuxt.options.vite.server, {
+      watch: {
+        ignored: [`!${join(dirPath, '**')}`],
+      },
+    })
+
     codes.map((code) => {
       const { dst } = addTemplate({
         write: true,
-        filename: `../.locales/${code}.json`,
+        filename: `${path}/${code}.json`,
         getContents: () => fetchTranslations(code, runtimeConfig).then((translations) => {
           return JSON.stringify(Object.fromEntries(translations.map(translation => [translation.key, translation.value])), null, 2)
         }),
       })
 
-      nuxt.hook('builder:watch', async (event, filePath) => {
-        if (filePath === dst) {
-          const translations = JSON.parse(readFileSync(filePath, 'utf-8'))
-          const done = await syncTranslations(code, translations, runtimeConfig)
-          if (!done) return
-          logger.info(`Synced translations for locale: ${code}`)
-        }
+      nuxt.hook('builder:watch', async (_, filePath) => {
+        console.log('filePath', filePath, dst)
+        if (filePath !== dst) return
+        const translations = JSON.parse(readFileSync(filePath, 'utf-8'))
+        const done = await syncTranslations(code, translations, runtimeConfig)
+        if (!done) return
+        logger.info(`Synced translations for locale: ${code}`)
       })
     })
   }
@@ -168,10 +178,10 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
   nuxt.hook('i18n:registerModule', (register) => {
     const locales = codes.map(code => ({
       code,
-      file: 'index.js',
+      file: resolve('./runtime/lang/index'),
     }))
 
-    register({ langDir: resolve('./runtime/lang'), locales })
+    register({ langDir: '', locales })
 
     logger.success('Locales have been registered: ' + codes.join(', '))
   })

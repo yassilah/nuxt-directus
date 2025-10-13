@@ -3,6 +3,8 @@ import { createDirectus } from '@directus/sdk'
 import { parseHost, joinURL } from 'ufo'
 import { createError, useRuntimeConfig } from '#imports'
 import { fetchTranslations } from './server'
+
+// @ts-expect-error - types are not generated yet
 import type { Schema } from '#directus/types'
 /**
  * Get runtime directus URL
