@@ -1,6 +1,6 @@
 {
   "name": "@yassidev/nuxt-directus",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A Nuxt module for better integration with Directus CMS.",
   "repository": "yassilah/nuxt-directus",
   "license": "MIT",
