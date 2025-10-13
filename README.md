@@ -238,7 +238,7 @@ In development mode, local translation file changes are automatically synchroniz
 
 ### @nuxt/image Integration
 
-The module automatically configures `@nuxt/image` with an alias for Directus assets:
+The module automatically configures `@nuxt/image` with an alias for Directus assets. Please make sure to place `@yassidev/nuxt-directus` **before** `@nuxt/image` in your modules array.
 
 ```vue
 <template>
