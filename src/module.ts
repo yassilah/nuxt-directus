@@ -1,5 +1,4 @@
 import { hasNuxtModule, createResolver, defineNuxtModule, updateRuntimeConfig, useLogger, addTypeTemplate, addTemplate, addImports, addServerImports } from 'nuxt/kit'
-import { NAME } from './constants'
 import type { NuxtI18nOptions } from '@nuxtjs/i18n'
 import type { ModuleOptions as ImageOptions } from '@nuxt/image'
 import type { Nuxt } from 'nuxt/schema'
@@ -22,6 +21,8 @@ interface ModuleOptions {
 }
 
 type Config = ReturnType<typeof normalizeConfig>
+
+export const NAME = 'directus'
 
 export default defineNuxtModule<ModuleOptions>({
   meta: { name: NAME },
