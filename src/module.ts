@@ -9,6 +9,7 @@ import type { ProxyOptions } from 'h3'
 import { defu } from 'defu'
 import { fetchTranslations, syncTranslations } from './runtime/server'
 import { readFileSync } from 'node:fs'
+import { NAME } from './runtime/constants'
 
 interface ModuleOptions {
   url?: string
@@ -21,8 +22,6 @@ interface ModuleOptions {
 }
 
 type Config = ReturnType<typeof normalizeConfig>
-
-export const NAME = 'directus'
 
 export default defineNuxtModule<ModuleOptions>({
   meta: { name: NAME },

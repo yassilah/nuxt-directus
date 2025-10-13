@@ -1,4 +1,4 @@
-import { NAME } from '../module'
+import { NAME } from './constants'
 import { createDirectus } from '@directus/sdk'
 import { parseHost, joinURL } from 'ufo'
 import { createError, useRuntimeConfig } from '#imports'
