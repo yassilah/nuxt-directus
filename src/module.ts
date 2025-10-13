@@ -8,7 +8,7 @@ import type { ConsolaInstance } from 'consola'
 import type { ProxyOptions } from 'h3'
 import { defu } from 'defu'
 import { fetchTranslations, syncTranslations } from './runtime/server'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { NAME } from './runtime/constants'
 import { join } from 'node:path'
 import chokidar from 'chokidar'
@@ -150,7 +150,7 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
     const path = 'directus/locales'
 
     const result = codes.map((code) => {
-      const { dst } = addTemplate({
+      const { filename } = addTemplate({
         write: true,
         filename: join(path, `${code}.json`),
         getContents: () => fetchTranslations(code, runtimeConfig).then((translations) => {
@@ -158,16 +158,16 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
         }),
       })
 
-      return { code, dst }
+      return { code, filename }
     })
 
     if (nuxt.options.dev && !nuxt.options._prepare) {
-      const watcher = chokidar.watch(resolve(nuxt.options.buildDir, path, '*.json'), { ignoreInitial: true })
+      const watcher = chokidar.watch(path, { cwd: nuxt.options.buildDir, ignoreInitial: true })
 
       watcher.on('change', async (filePath) => {
-        const code = result.find(i => i.dst === filePath)?.code
+        const code = result.find(i => i.filename === filePath)?.code
         if (!code) return
-        const translations = JSON.parse(readFileSync(filePath, 'utf-8'))
+        const translations = JSON.parse(readFileSync(resolve(nuxt.options.buildDir, filePath), 'utf-8'))
         const done = await syncTranslations(code, translations, runtimeConfig)
         if (!done) return
         logger.info(`Synced translations for locale: ${code}`)
@@ -176,12 +176,14 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
   }
 
   nuxt.hook('i18n:registerModule', (register) => {
+    const isStubbing = existsSync(resolve('./runtime/lang/index.ts'))
+
     const locales = codes.map(code => ({
       code,
-      file: resolve('./runtime/lang/index'),
+      file: isStubbing ? 'index.ts' : 'index.js',
     }))
 
-    register({ langDir: '', locales })
+    register({ langDir: resolve('./runtime/lang'), locales })
 
     logger.success('Locales have been registered: ' + codes.join(', '))
   })
