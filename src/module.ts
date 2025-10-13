@@ -168,7 +168,7 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
   nuxt.hook('i18n:registerModule', (register) => {
     const locales = codes.map(code => ({
       code,
-      file: 'index.ts',
+      file: 'index',
     }))
 
     register({ langDir: resolve('./runtime/lang'), locales })
