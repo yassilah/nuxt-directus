@@ -1,5 +1,5 @@
 import { graphql } from '@directus/sdk'
-import { createBaseDirectus } from '../helpers'
+import { createBaseDirectus } from './../client'
 
 /**
  * Use directus (rest)

@@ -7,7 +7,7 @@ import { withoutTrailingSlash, joinURL } from 'ufo'
 import type { ConsolaInstance } from 'consola'
 import type { ProxyOptions } from 'h3'
 import { defu } from 'defu'
-import { fetchTranslations, syncTranslations } from './helpers'
+import { fetchTranslations, syncTranslations } from './runtime/server'
 import { readFileSync } from 'node:fs'
 
 interface ModuleOptions {

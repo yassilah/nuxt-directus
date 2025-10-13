@@ -2,7 +2,7 @@ import { NAME } from '../module'
 import { createDirectus } from '@directus/sdk'
 import { parseHost, joinURL } from 'ufo'
 import { createError, useRuntimeConfig } from '#imports'
-import { fetchTranslations } from './../helpers'
+import { fetchTranslations } from './server'
 import type { Schema } from '#directus/types'
 /**
  * Get runtime directus URL
