@@ -161,7 +161,7 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
       return { code, dst }
     })
 
-    if (!nuxt.options._prepare) {
+    if (nuxt.options.dev && !nuxt.options._prepare) {
       const watcher = chokidar.watch(resolve(nuxt.options.buildDir, path, '*.json'), { ignoreInitial: true })
 
       watcher.on('change', async (filePath) => {
