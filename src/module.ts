@@ -1,4 +1,4 @@
-import { hasNuxtModule, createResolver, defineNuxtModule, updateRuntimeConfig, useLogger, addTypeTemplate, addTemplate, addImports, addServerImports } from 'nuxt/kit'
+import { hasNuxtModule, createResolver, defineNuxtModule, updateRuntimeConfig, useLogger, addTypeTemplate, addTemplate, addImports, addServerImports, addImportsDir, addServerImportsDir } from 'nuxt/kit'
 import type { NuxtI18nOptions } from '@nuxtjs/i18n'
 import type { ModuleOptions as ImageOptions } from '@nuxt/image'
 import type { Nuxt } from 'nuxt/schema'
@@ -107,24 +107,24 @@ function normalizeConfig(options: ModuleOptions) {
 function setupComposables(config: Config, nuxt: Nuxt, logger: ConsolaInstance) {
   const { resolve } = createResolver(import.meta.url)
 
-  const path = resolve(`./runtime/composables/${config.composables.mode}`)
+  const path = resolve(`./runtime/composables`)
 
-  nuxt.options.alias = defu(nuxt.options.alias, {
-    '#directus': path,
-  })
+  const name = config.composables.mode === 'graphql' ? 'useDirectusGraphql' : 'useDirectusRest'
+
+  const mainImport = {
+    name,
+    as: 'useDirectus',
+    from: join(path, 'useDirectus'),
+  }
 
   if (config.composables.client) {
-    addImports({
-      from: path,
-      name: 'useDirectus',
-    })
+    addImportsDir(path)
+    addImports(mainImport)
   }
 
   if (config.composables.server) {
-    addServerImports({
-      from: path,
-      name: 'useDirectus',
-    })
+    addServerImportsDir(path)
+    addServerImports(mainImport)
   }
 
   logger.info(`Composables have been registered (mode: ${config.composables.mode}).`)

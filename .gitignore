@@ -57,3 +57,5 @@ Temporary Items
 
 playground/db.sqlite
 playground/.locales
+test/db.sqlite
+!test/.env
