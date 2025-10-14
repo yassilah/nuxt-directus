@@ -137,7 +137,6 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
   const { resolve } = createResolver(import.meta.url)
 
   const codes = (nuxt.options.i18n?.locales || []).map(locale => typeof locale === 'string' ? locale : locale.code)
-
   if (!codes.length) return
 
   if (config.i18n.sync) {

@@ -1,4 +1,4 @@
-import { createCollection, createDirectus, createItems, rest, staticToken, createPermissions, readPolicies } from '@directus/sdk'
+import { createCollection, createDirectus, createItems, rest, staticToken, createPermissions, readPolicies, createTranslations } from '@directus/sdk'
 import { exec } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
@@ -95,6 +95,16 @@ async function createDummyData() {
       collection: 'directus_files',
     }],
     ))
+
+    await directus.request(createTranslations([{
+      language: 'en-US',
+      key: 'hello',
+      value: 'Hello',
+    }, {
+      language: 'fr-FR',
+      key: 'hello',
+      value: 'Bonjour',
+    }]))
   }
   catch (error) {
     console.error('Error creating dummy data:', error)
