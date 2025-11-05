@@ -6,6 +6,7 @@ import { fetchTranslations } from './server'
 
 // @ts-expect-error - types are not generated yet
 import type { Schema } from '#directus/types'
+
 /**
  * Get runtime directus URL
  */
