@@ -92,7 +92,7 @@ function normalizeConfig(options: ModuleOptions) {
     composables: options.composables === false ? { enabled: false } : options.composables,
   }, {
     url: process.env.DIRECTUS_URL ?? 'http://localhost:8055',
-    accessToken: process.env.DIRECTUS_ACCESS_TOKEN ?? '',
+    accessToken: process.env.DIRECTUS_ACCESS_TOKEN || process.env.DIRECTUS_ADMIN_TOKEN || '',
     i18n: { enabled: hasNuxtModule('@nuxtjs/i18n'), sync: true, prefix: undefined },
     types: { enabled: true },
     proxy: { enabled: true, path: '/api', options: {} },
