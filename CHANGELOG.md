@@ -1,4 +1,28 @@
 # Changelog
+
+## v0.0.15
+
+[compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.15...v0.0.15)
+
+### 🏡 Chore
+
+- **release:** V0.0.14 ([68bbfab](https://github.com/yassilah/nuxt-directus/commit/68bbfab))
+
+### ❤️ Contributors
+
+- Yasser Lahbibi ([@yassilah](https://github.com/yassilah))
+
+## v0.0.15
+
+### Features
+- **types**: Added `transform` option to allow regex-based transformations on generated types
+- **proxy**: Changed default proxy path from `/api` to `/directus` to avoid conflicts with Nitro
+
+### Tests
+- Added test suite for the new `transform` option
+
+[compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.14...v0.0.15)
+
 ## v0.0.14
 
 [compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.15...v0.0.14)
