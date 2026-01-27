@@ -18,7 +18,7 @@ interface ModuleOptions {
   accessToken?: string
   composables?: false | { enabled?: boolean, mode?: 'graphql' | 'rest', client?: boolean, server?: boolean }
   i18n?: false | { enabled?: boolean, sync?: boolean, prefix?: string }
-  types?: false | { enabled?: boolean }
+  types?: false | { enabled?: boolean, transform?: Array<{ from: string | RegExp, to: string }> }
   proxy?: false | { enabled?: boolean, path?: string, options?: ProxyOptions }
   image?: false | { enabled?: boolean, alias?: string }
 }
@@ -94,8 +94,8 @@ function normalizeConfig(options: ModuleOptions) {
     url: process.env.DIRECTUS_URL ?? 'http://localhost:8055',
     accessToken: process.env.DIRECTUS_ACCESS_TOKEN || process.env.DIRECTUS_ADMIN_TOKEN || '',
     i18n: { enabled: hasNuxtModule('@nuxtjs/i18n'), sync: true, prefix: undefined },
-    types: { enabled: true },
-    proxy: { enabled: true, path: '/api', options: {} },
+    types: { enabled: true, transform: [] },
+    proxy: { enabled: true, path: '/directus', options: {} },
     image: { enabled: hasNuxtModule('@nuxt/image'), alias: 'directus' },
     composables: { enabled: true, mode: 'rest', client: true, server: true },
   })
@@ -194,11 +194,23 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
 async function setupTypes(config: Config, nuxt: Nuxt, logger: ConsolaInstance) {
   addTypeTemplate({
     filename: 'directus/types.d.ts',
-    getContents: () => generateDirectusTypes({
-      directusUrl: withoutTrailingSlash(config.url),
-      outputPath: '',
-      directusToken: config.accessToken,
-    }),
+    getContents: async () => {
+      let types = await generateDirectusTypes({
+        directusUrl: withoutTrailingSlash(config.url),
+        outputPath: '',
+        directusToken: config.accessToken,
+      })
+
+      // Apply transformations if provided
+      if (config.types.transform && config.types.transform.length > 0) {
+        for (const { from, to } of config.types.transform) {
+          const regex = typeof from === 'string' ? new RegExp(from, 'g') : from
+          types = types.replace(regex, to)
+        }
+      }
+
+      return types
+    },
   })
 
   nuxt.options.alias = defu(nuxt.options.alias, {

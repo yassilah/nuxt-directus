@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useAsyncData } from '#app'
 
-const { data } = useAsyncData<{ data: { name: string }[] }>(() => {
-  return $fetch('/api/proxy/items/projects')
+const { data } = useAsyncData<{ data: { name: string }[] }>('key', () => {
+  return $fetch('/directus/items/projects')
 })
 </script>
 

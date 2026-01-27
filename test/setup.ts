@@ -21,11 +21,14 @@ async function startDirectus() {
   return new Promise<void>((resolve, reject) => {
     exec('npx directus bootstrap', { cwd: path }, (error) => {
       if (error) return reject(error)
+      console.log('Directus bootstrapped...', path)
       exec('npx directus start', { cwd: path, signal: controller.signal })
       const interval = setInterval(async () => {
+        console.log('Checking if Directus is ready...')
         if (await isDirectusReady()) {
+          console.log('Directus is ready!')
           clearInterval(interval)
-          await createDummyData()
+          await createDummyData().catch(reject)
           resolve()
         }
       }, 1000)
@@ -37,78 +40,73 @@ async function startDirectus() {
  * Create a projects collection and some items.
  */
 async function createDummyData() {
-  try {
-    const directus = createDirectus('http://localhost:8055').with(rest()).with(staticToken('test-token'))
+  const directus = createDirectus('http://localhost:8055').with(staticToken('SUPER_TOKEN')).with(rest())
 
-    await directus.request(createCollection({
-      collection: 'projects',
+  await directus.request(createCollection({
+    collection: 'projects',
+    schema: {
+      name: 'projects',
+    },
+    fields: [{
+      field: 'id',
+      type: 'integer',
       schema: {
-        name: 'projects',
+        is_primary_key: true,
+        has_auto_increment: true,
       },
-      fields: [{
-        field: 'id',
-        type: 'integer',
-        schema: {
-          is_primary_key: true,
-          has_auto_increment: true,
-        },
-      }, {
-        field: 'name',
-        type: 'string',
-        schema: {
-          is_nullable: false,
-        },
-      }, {
-        field: 'picture',
-        type: 'string',
-        schema: {
-          is_nullable: true,
-        },
-      }],
-    }))
-
-    await directus.request(createItems('projects', [
-      { name: 'Project 1' },
-    ]))
-
-    const [publicPolicy] = await directus.request(readPolicies({
-      fields: ['id'],
-      filter: { name: { _eq: '$t:public_label' } },
-    }))
-
-    if (!publicPolicy) throw new Error('Public policy not found')
-
-    await directus.request(createPermissions([{
-      policy: publicPolicy.id,
-      fields: ['*'],
-      action: 'read',
-      collection: 'projects',
     }, {
-      policy: publicPolicy.id,
-      fields: ['*'],
-      action: 'read',
-      collection: 'directus_translations',
+      field: 'name',
+      type: 'string',
+      schema: {
+        is_nullable: false,
+      },
     }, {
-      policy: publicPolicy.id,
-      fields: ['*'],
-      action: 'read',
-      collection: 'directus_files',
+      field: 'picture',
+      type: 'string',
+      schema: {
+        is_nullable: true,
+      },
     }],
-    ))
+  }))
 
-    await directus.request(createTranslations([{
-      language: 'en-US',
-      key: 'hello',
-      value: 'Hello',
-    }, {
-      language: 'fr-FR',
-      key: 'hello',
-      value: 'Bonjour',
-    }]))
-  }
-  catch (error) {
-    console.error('Error creating dummy data:', error)
-  }
+  await directus.request(createItems('projects', [
+    { name: 'Project 1' },
+  ]))
+
+  const [publicPolicy] = await directus.request(readPolicies({
+    fields: ['id'],
+    filter: { name: { _eq: '$t:public_label' } },
+  }))
+
+  if (!publicPolicy) throw new Error('Public policy not found')
+
+  await directus.request(createPermissions([{
+    policy: publicPolicy.id,
+    fields: ['*'],
+    action: 'read',
+    collection: 'projects',
+  }, {
+    policy: publicPolicy.id,
+    fields: ['*'],
+    action: 'read',
+    collection: 'directus_translations',
+  }, {
+    policy: publicPolicy.id,
+    fields: ['*'],
+    action: 'read',
+    collection: 'directus_files',
+  }],
+  ))
+
+  await directus.request(createTranslations([{
+    language: 'en-US',
+    key: 'hello',
+    value: 'Hello',
+  }, {
+    language: 'fr-FR',
+    key: 'hello',
+    value: 'Bonjour',
+  }]))
 }
 
 /**

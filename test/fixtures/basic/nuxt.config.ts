@@ -8,8 +8,13 @@ export default defineNuxtConfig({
   ],
   directus: {
     url: 'http://localhost:8055',
-    accessToken: 'test-token',
-    proxy: { path: '/api/proxy' },
+    accessToken: 'SUPER_TOKEN',
+    types: {
+      transform: [
+        { from: /directus_files/g, to: 'files' },
+        { from: /directus_users/g, to: 'users' },
+      ],
+    },
   },
   i18n: {
     locales: ['en-US', 'fr-FR'],

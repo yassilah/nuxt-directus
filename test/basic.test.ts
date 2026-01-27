@@ -3,11 +3,11 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, it, expect } from 'vitest'
 
-describe.skip('basic', async () => {
-  await setup({
-    rootDir: fileURLToPath(new URL('./fixtures/basic', import.meta.url)),
-  })
+await setup({
+  rootDir: fileURLToPath(new URL('./fixtures/basic', import.meta.url)),
+})
 
+describe('basic', async () => {
   it('should work with proxy (useAsyncData)', async () => {
     const path = url('/proxy/use-async')
     const page = await createPage(path)
