@@ -52,7 +52,7 @@ export default defineNuxtModule<ModuleOptions>({
       },
     })
 
-    if (config.types.enabled) {
+    if (config.types.enabled && nuxt.options.dev) {
       setupTypes(config, nuxt, logger)
     }
 
@@ -139,7 +139,7 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
   const codes = (nuxt.options.i18n?.locales || []).map(locale => typeof locale === 'string' ? locale : locale.code)
   if (!codes.length) return
 
-  if (config.i18n.sync) {
+  if (nuxt.options.dev && config.i18n.sync) {
     const runtimeConfig = {
       url: config.url,
       accessToken: config.accessToken,
@@ -174,6 +174,7 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
     }
   }
 
+  // @ts-expect-error - i18n is not yet installed
   nuxt.hook('i18n:registerModule', (register) => {
     const isStubbing = existsSync(resolve('./runtime/lang/index.ts'))
 
