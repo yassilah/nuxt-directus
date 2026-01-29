@@ -9,7 +9,11 @@ export default defineNuxtConfig({
   directus: {
     url: 'http://localhost:8055',
     accessToken: 'SUPER_TOKEN',
+    i18n: {
+      sync: true,
+    },
     types: {
+      enabled: true,
       transform: [
         { from: /directus_files/g, to: 'files' },
         { from: /directus_users/g, to: 'users' },

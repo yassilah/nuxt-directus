@@ -29,7 +29,7 @@ export default defineNuxtModule<ModuleOptions>({
   meta: { name: NAME },
   setup(options, nuxt) {
     const logger = useLogger(NAME)
-    const config = normalizeConfig(options)
+    const config = normalizeConfig(options, nuxt)
 
     if (!config.accessToken || !config.url) {
       logger.error(`Please provide both 'url' and 'accessToken' options.`)
@@ -52,7 +52,7 @@ export default defineNuxtModule<ModuleOptions>({
       },
     })
 
-    if (config.types.enabled && nuxt.options.dev) {
+    if (config.types.enabled) {
       setupTypes(config, nuxt, logger)
     }
 
@@ -81,7 +81,7 @@ export default defineNuxtModule<ModuleOptions>({
 /**
  * Normalize module config
  */
-function normalizeConfig(options: ModuleOptions) {
+function normalizeConfig(options: ModuleOptions, nuxt: Nuxt) {
   return defu({
     url: options.url,
     accessToken: options.accessToken,
@@ -93,8 +93,8 @@ function normalizeConfig(options: ModuleOptions) {
   }, {
     url: process.env.DIRECTUS_URL ?? 'http://localhost:8055',
     accessToken: process.env.DIRECTUS_ACCESS_TOKEN || process.env.DIRECTUS_ADMIN_TOKEN || '',
-    i18n: { enabled: hasNuxtModule('@nuxtjs/i18n'), sync: true, prefix: undefined },
-    types: { enabled: true, transform: [] },
+    i18n: { enabled: hasNuxtModule('@nuxtjs/i18n'), sync: nuxt.options.dev, prefix: undefined },
+    types: { enabled: nuxt.options.dev, transform: [] },
     proxy: { enabled: true, path: '/directus', options: {} },
     image: { enabled: hasNuxtModule('@nuxt/image'), alias: 'directus' },
     composables: { enabled: true, mode: 'rest', client: true, server: true },
@@ -139,7 +139,7 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
   const codes = (nuxt.options.i18n?.locales || []).map(locale => typeof locale === 'string' ? locale : locale.code)
   if (!codes.length) return
 
-  if (nuxt.options.dev && config.i18n.sync) {
+  if (config.i18n.sync) {
     const runtimeConfig = {
       url: config.url,
       accessToken: config.accessToken,
