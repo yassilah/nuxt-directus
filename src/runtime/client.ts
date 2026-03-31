@@ -1,7 +1,7 @@
 import { NAME } from './constants'
 import { authentication, createDirectus, staticToken } from '@directus/sdk'
 import { parseHost, joinURL } from 'ufo'
-import { createError, useRuntimeConfig } from '#imports'
+import { createError, useRuntimeConfig, toValue, useCookie } from '#imports'
 import { fetchTranslations } from './server'
 
 // @ts-expect-error - types are not generated yet
