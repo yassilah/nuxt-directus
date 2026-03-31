@@ -1,5 +1,5 @@
 import { NAME } from './constants'
-import { createDirectus } from '@directus/sdk'
+import { authentication, createDirectus, staticToken } from '@directus/sdk'
 import { parseHost, joinURL } from 'ufo'
 import { createError, useRuntimeConfig } from '#imports'
 import { fetchTranslations } from './server'
@@ -36,12 +36,21 @@ function getRuntimeClientDirectusURL(path: string) {
  * Create base directus instance.
  */
 export function createBaseDirectus() {
-  const { url } = getRuntimeConfig()
+  const { url, auth } = getRuntimeConfig()
 
-  return createDirectus<Schema>(url, {
+  const instance = createDirectus<Schema>(url, {
     globals: {
       fetch: $fetch.create({
         baseURL: url,
+        onRequest({ options }) {
+          if (!auth?.cookieName) return
+
+          const token = toValue(useCookie(auth.cookieName))
+
+          if (token) {
+            options.headers.set('Authorization', `Bearer ${token}`)
+          }
+        },
         onResponseError({ response }) {
           const [error] = response._data.errors || []
           if (!error) return
@@ -53,6 +62,24 @@ export function createBaseDirectus() {
       }),
     },
   })
+
+  if (auth.mode === 'static') {
+    instance.with(staticToken(auth.token))
+  }
+  else if (auth.mode === 'cookie') {
+    instance.with(authentication('cookie', {
+      autoRefresh: auth.autoRefresh,
+      credentials: 'include',
+    }))
+  }
+  else if (auth.mode === 'session') {
+    instance.with(authentication('session', {
+      autoRefresh: auth.autoRefresh,
+      credentials: 'include',
+    }))
+  }
+
+  return instance
 }
 
 /**

@@ -21,7 +21,19 @@ interface ModuleOptions {
   types?: false | { enabled?: boolean, transform?: Array<{ from: string | RegExp, to: string }> }
   proxy?: false | { enabled?: boolean, path?: string, options?: ProxyOptions }
   image?: false | { enabled?: boolean, alias?: string }
+  auth?: false | AuthConfig
 }
+
+type AuthConfig = {
+  enabled?: boolean
+} & ({
+  mode: 'static'
+  token?: string
+} | {
+  mode: 'cookie' | 'session'
+  autoRefresh?: boolean
+  cookieName?: string
+})
 
 type Config = ReturnType<typeof normalizeConfig>
 
@@ -46,8 +58,16 @@ export default defineNuxtModule<ModuleOptions>({
       },
       public: {
         [NAME]: {
-          url: config.proxy.enabled ? config.proxy.path : config.composables.client ? config.url : undefined,
+          url: config.composables.client ? config.url : undefined,
           i18nPrefix: config.i18n.prefix,
+          auth: config.auth.enabled
+            ? {
+                mode: config.auth.mode,
+                autoRefresh: config.auth.mode === 'cookie' || config.auth.mode === 'session' ? config.auth.autoRefresh : undefined,
+                cookieName: config.auth.mode === 'cookie' || config.auth.mode === 'session' ? config.auth.cookieName : undefined,
+                token: config.auth.mode === 'static' ? config.auth.token ?? config.accessToken : undefined,
+              }
+            : undefined,
         },
       },
     })
@@ -90,6 +110,7 @@ function normalizeConfig(options: ModuleOptions, nuxt: Nuxt) {
     proxy: options.proxy === false ? { enabled: false } : options.proxy,
     image: options.image === false ? { enabled: false } : options.image,
     composables: options.composables === false ? { enabled: false } : options.composables,
+    auth: options.auth === false ? { enabled: false } : options.auth,
   }, {
     url: process.env.DIRECTUS_URL ?? 'http://localhost:8055',
     accessToken: process.env.DIRECTUS_ACCESS_TOKEN || process.env.DIRECTUS_ADMIN_TOKEN || '',
@@ -98,6 +119,7 @@ function normalizeConfig(options: ModuleOptions, nuxt: Nuxt) {
     proxy: { enabled: true, path: '/directus', options: {} },
     image: { enabled: hasNuxtModule('@nuxt/image'), alias: 'directus' },
     composables: { enabled: true, mode: 'rest', client: true, server: true },
+    auth: { enabled: true, mode: 'session', autoRefresh: true, cookieName: 'directus_session_token' } as AuthConfig,
   })
 }
 
