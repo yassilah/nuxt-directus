@@ -50,24 +50,27 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.typescript.hoist ??= []
     nuxt.options.typescript.hoist.push('@directus/sdk')
 
+    const auth = config.auth.enabled
+      ? {
+          mode: config.auth.mode,
+          autoRefresh: config.auth.mode === 'cookie' || config.auth.mode === 'session' ? config.auth.autoRefresh : undefined,
+          cookieName: config.auth.mode === 'cookie' || config.auth.mode === 'session' ? config.auth.cookieName : undefined,
+          token: config.auth.mode === 'static' ? config.auth.token ?? config.accessToken : undefined,
+        }
+      : undefined
+
     updateRuntimeConfig({
       [NAME]: {
         url: config.url,
         accessToken: config.accessToken,
         i18nPrefix: config.i18n.prefix,
+        auth,
       },
       public: {
         [NAME]: {
           url: config.composables.client ? config.url : undefined,
           i18nPrefix: config.i18n.prefix,
-          auth: config.auth.enabled
-            ? {
-                mode: config.auth.mode,
-                autoRefresh: config.auth.mode === 'cookie' || config.auth.mode === 'session' ? config.auth.autoRefresh : undefined,
-                cookieName: config.auth.mode === 'cookie' || config.auth.mode === 'session' ? config.auth.cookieName : undefined,
-                token: config.auth.mode === 'static' ? config.auth.token ?? config.accessToken : undefined,
-              }
-            : undefined,
+          auth,
         },
       },
     })
