@@ -121,8 +121,8 @@ function normalizeConfig(options: ModuleOptions, nuxt: Nuxt) {
     types: { enabled: nuxt.options.dev, transform: [] },
     proxy: { enabled: true, path: '/directus', options: {} },
     image: { enabled: hasNuxtModule('@nuxt/image'), alias: 'directus' },
-    composables: { enabled: true, mode: 'rest', client: true, server: true },
-    auth: { enabled: true, mode: 'session', autoRefresh: true, cookieName: 'directus_session_token' } as AuthConfig,
+    composables: { enabled: true, mode: 'rest', client: true, server: false },
+    auth: { enabled: true, mode: 'cookie', autoRefresh: true, cookieName: 'auth_token' } as AuthConfig,
   })
 }
 

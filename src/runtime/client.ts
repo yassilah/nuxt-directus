@@ -1,7 +1,7 @@
 import { NAME } from './constants'
 import { authentication, createDirectus, staticToken } from '@directus/sdk'
 import { parseHost, joinURL } from 'ufo'
-import { createError, useRuntimeConfig, toValue, useCookie } from '#imports'
+import { createError, useCookie, useRuntimeConfig } from '#imports'
 import { fetchTranslations } from './server'
 
 // @ts-expect-error - types are not generated yet
@@ -41,14 +41,32 @@ export function createBaseDirectus() {
   const instance = createDirectus<Schema>(url, {
     globals: {
       fetch: $fetch.create({
-        baseURL: url,
-        onRequest({ options }) {
+        async  onRequest({ options }) {
           if (!auth?.cookieName) return
-
-          const token = toValue(useCookie(auth.cookieName))
+          const token = useCookie(auth.cookieName).value
 
           if (token) {
             options.headers.set('Authorization', `Bearer ${token}`)
+          }
+        },
+        async onResponse({ response, options, request }) {
+          try {
+            if (!auth?.cookieName) return
+
+            if (request.toString().endsWith('/auth/login')) {
+              const { mode } = JSON.parse(String(options.body))
+
+              if (mode === 'cookie') {
+                const { access_token, expires } = response._data.data
+
+                useCookie(auth.cookieName, {
+                  expires: expires ? new Date(Date.now() + expires * 1000) : undefined,
+                }).value = access_token
+              }
+            }
+          }
+          catch (error) {
+            console.error('Error handling response:', error)
           }
         },
         onResponseError({ response }) {
