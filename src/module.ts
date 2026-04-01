@@ -1,4 +1,4 @@
-import { hasNuxtModule, createResolver, defineNuxtModule, updateRuntimeConfig, useLogger, addTypeTemplate, addTemplate, addImports, addServerImports, addImportsDir, addServerImportsDir } from 'nuxt/kit'
+import { hasNuxtModule, createResolver, defineNuxtModule, updateRuntimeConfig, useLogger, addTypeTemplate, addTemplate, addImports, addServerImports } from 'nuxt/kit'
 import type { NuxtI18nOptions } from '@nuxtjs/i18n'
 import type { ModuleOptions as ImageOptions } from '@nuxt/image'
 import type { Nuxt } from 'nuxt/schema'
@@ -16,24 +16,11 @@ import chokidar from 'chokidar'
 interface ModuleOptions {
   url?: string
   accessToken?: string
-  composables?: false | { enabled?: boolean, mode?: 'graphql' | 'rest', client?: boolean, server?: boolean }
   i18n?: false | { enabled?: boolean, sync?: boolean, prefix?: string }
   types?: false | { enabled?: boolean, transform?: Array<{ from: string | RegExp, to: string }> }
   proxy?: false | { enabled?: boolean, path?: string, options?: ProxyOptions }
   image?: false | { enabled?: boolean, alias?: string }
-  auth?: false | AuthConfig
 }
-
-type AuthConfig = {
-  enabled?: boolean
-} & ({
-  mode: 'static'
-  token?: string
-} | {
-  mode: 'cookie' | 'session'
-  autoRefresh?: boolean
-  cookieName?: string
-})
 
 type Config = ReturnType<typeof normalizeConfig>
 
@@ -50,37 +37,41 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.typescript.hoist ??= []
     nuxt.options.typescript.hoist.push('@directus/sdk')
 
-    const auth = config.auth.enabled
-      ? {
-          mode: config.auth.mode,
-          autoRefresh: config.auth.mode === 'cookie' || config.auth.mode === 'session' ? config.auth.autoRefresh : undefined,
-          cookieName: config.auth.mode === 'cookie' || config.auth.mode === 'session' ? config.auth.cookieName : undefined,
-          token: config.auth.mode === 'static' ? config.auth.token ?? config.accessToken : undefined,
-        }
-      : undefined
+    const { resolve } = createResolver(import.meta.url)
+
+    addImports([{
+      name: 'createBaseDirectus',
+      from: resolve('./runtime/client'),
+    }, {
+      name: 'handleDirectusError',
+      from: resolve('./runtime/client'),
+    },
+    ])
+
+    addServerImports([{
+      name: 'createBaseDirectus',
+      from: resolve('./runtime/client'),
+    }, {
+      name: 'handleDirectusError',
+      from: resolve('./runtime/client'),
+    }])
 
     updateRuntimeConfig({
       [NAME]: {
         url: config.url,
         accessToken: config.accessToken,
         i18nPrefix: config.i18n.prefix,
-        auth,
       },
       public: {
         [NAME]: {
-          url: config.composables.client ? config.url : undefined,
+          url: config.url,
           i18nPrefix: config.i18n.prefix,
-          auth,
         },
       },
     })
 
     if (config.types.enabled) {
       setupTypes(config, nuxt, logger)
-    }
-
-    if (config.composables.enabled) {
-      setupComposables(config, nuxt, logger)
     }
 
     if (config.i18n.enabled) {
@@ -112,8 +103,7 @@ function normalizeConfig(options: ModuleOptions, nuxt: Nuxt) {
     types: options.types === false ? { enabled: false } : options.types,
     proxy: options.proxy === false ? { enabled: false } : options.proxy,
     image: options.image === false ? { enabled: false } : options.image,
-    composables: options.composables === false ? { enabled: false } : options.composables,
-    auth: options.auth === false ? { enabled: false } : options.auth,
+
   }, {
     url: process.env.DIRECTUS_URL ?? 'http://localhost:8055',
     accessToken: process.env.DIRECTUS_ACCESS_TOKEN || process.env.DIRECTUS_ADMIN_TOKEN || '',
@@ -121,38 +111,7 @@ function normalizeConfig(options: ModuleOptions, nuxt: Nuxt) {
     types: { enabled: nuxt.options.dev, transform: [] },
     proxy: { enabled: true, path: '/directus', options: {} },
     image: { enabled: hasNuxtModule('@nuxt/image'), alias: 'directus' },
-    composables: { enabled: true, mode: 'rest', client: true, server: false },
-    auth: { enabled: true, mode: 'cookie', autoRefresh: true, cookieName: 'auth_token' } as AuthConfig,
   })
-}
-
-/**
- * Setup composables
- */
-function setupComposables(config: Config, nuxt: Nuxt, logger: ConsolaInstance) {
-  const { resolve } = createResolver(import.meta.url)
-
-  const path = resolve(`./runtime/composables`)
-
-  const name = config.composables.mode === 'graphql' ? 'useDirectusGraphql' : 'useDirectusRest'
-
-  const mainImport = {
-    name,
-    as: 'useDirectus',
-    from: join(path, 'useDirectus'),
-  }
-
-  if (config.composables.client) {
-    addImportsDir(path)
-    addImports(mainImport)
-  }
-
-  if (config.composables.server) {
-    addServerImportsDir(path)
-    addServerImports(mainImport)
-  }
-
-  logger.info(`Composables have been registered (mode: ${config.composables.mode}).`)
 }
 
 /**
