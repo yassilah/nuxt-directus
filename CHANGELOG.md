@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.0.30
+
+[compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.29...v0.0.30)
+
+### 🩹 Fixes
+
+- **sdk:** Use starts_with ([961b52d](https://github.com/yassilah/nuxt-directus/commit/961b52d))
+
+### ❤️ Contributors
+
+- Yasser Lahbibi ([@yassilah](https://github.com/yassilah))
+
 ## v0.0.29
 
 [compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.28...v0.0.29)
