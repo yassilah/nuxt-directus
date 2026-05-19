@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.24
+
+[compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.18...v0.0.24)
+
 ## v0.0.18
 
 [compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.17...v0.0.18)
