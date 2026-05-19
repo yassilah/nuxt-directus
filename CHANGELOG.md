@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.0.31
+
+[compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.30...v0.0.31)
+
+### 🩹 Fixes
+
+- **types:** Run types in prepare too ([abbe78d](https://github.com/yassilah/nuxt-directus/commit/abbe78d))
+
+### ❤️ Contributors
+
+- Yasser Lahbibi ([@yassilah](https://github.com/yassilah))
+
 ## v0.0.30
 
 [compare changes](https://github.com/yassilah/nuxt-directus/compare/v0.0.29...v0.0.30)
