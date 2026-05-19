@@ -1,7 +1,7 @@
 import { hasNuxtModule, createResolver, defineNuxtModule, updateRuntimeConfig, useLogger, addTypeTemplate, addTemplate, addImports, addServerImports } from 'nuxt/kit'
 import type { NuxtI18nOptions } from '@nuxtjs/i18n'
 import type { ModuleOptions as ImageOptions } from '@nuxt/image'
-import type { Nuxt } from 'nuxt/schema'
+import type { Nuxt } from '@nuxt/schema'
 import { generateDirectusTypes } from 'directus-sdk-typegen'
 import { withoutTrailingSlash, joinURL } from 'ufo'
 import type { ConsolaInstance } from 'consola'
@@ -108,7 +108,7 @@ function normalizeConfig(options: ModuleOptions, nuxt: Nuxt) {
     url: process.env.DIRECTUS_URL ?? 'http://localhost:8055',
     accessToken: process.env.DIRECTUS_ACCESS_TOKEN || process.env.DIRECTUS_ADMIN_TOKEN || '',
     i18n: { enabled: hasNuxtModule('@nuxtjs/i18n'), sync: nuxt.options.dev, prefix: undefined },
-    types: { enabled: nuxt.options.dev, transform: [] },
+    types: { enabled: nuxt.options.dev || nuxt.options._prepare, transform: [] },
     proxy: { enabled: true, path: '/directus', options: {} },
     image: { enabled: hasNuxtModule('@nuxt/image'), alias: 'directus' },
   })
@@ -158,7 +158,6 @@ function setupI18n(config: Config, nuxt: Nuxt & { options: { i18n?: NuxtI18nOpti
     }
   }
 
-  // @ts-expect-error - i18n is not yet installed
   nuxt.hook('i18n:registerModule', (register) => {
     const isStubbing = existsSync(resolve('./runtime/lang/index.ts'))
 
@@ -180,11 +179,20 @@ async function setupTypes(config: Config, nuxt: Nuxt, logger: ConsolaInstance) {
   addTypeTemplate({
     filename: 'directus/types.d.ts',
     getContents: async () => {
-      let types = await generateDirectusTypes({
-        directusUrl: withoutTrailingSlash(config.url),
-        outputPath: '',
-        directusToken: config.accessToken,
-      })
+      let types = ''
+
+      try {
+        types = await generateDirectusTypes({
+          directusUrl: withoutTrailingSlash(config.url),
+          outputPath: '',
+          directusToken: config.accessToken,
+        })
+      }
+      catch (error) {
+        if (!nuxt.options._prepare) {
+          logger.error('Failed to generate Directus types:', error)
+        }
+      }
 
       // Apply transformations if provided
       if (config.types.transform && config.types.transform.length > 0) {
