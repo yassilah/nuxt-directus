@@ -24,7 +24,7 @@ export async function fetchTranslations(locale: string, config: Config) {
   return await directus.request(readTranslations({
     fields: ['key', 'value', 'id'],
     limit: -1,
-    filter: { language: { _eq: locale }, ...(i18nPrefix ? { key: { _startsWith: i18nPrefix } } : {}) },
+    filter: { language: { _eq: locale }, ...(i18nPrefix ? { key: { _starts_with: i18nPrefix } } : {}) },
   })) as DirectusTranslation[]
 }
 
